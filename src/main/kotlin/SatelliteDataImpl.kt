@@ -11,6 +11,12 @@ class SatelliteDataImpl : DefaultSatelliteData() {
         this.isOccupied = isOccupied
     }
 
+    fun setOccupied(color: Color) {
+        this.isOccupied = true
+        setColor(color)
+
+    }
+
     private var color: Color? = null
 
     fun getColor(): Color? {
@@ -20,4 +26,6 @@ class SatelliteDataImpl : DefaultSatelliteData() {
     fun setColor(color: Color?) {
         this.color = color
     }
+
+
 }
