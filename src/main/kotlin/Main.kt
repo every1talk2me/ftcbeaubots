@@ -33,17 +33,7 @@ fun main(args : Array<String>) {
     val cArray = arrayOf<Int>(1,2,3,4,5)
     var count = 0
     for (hexagon in grid.hexagons) {
-        count = cArray.random()
-        if(count%5 == 0)
-            hexagon.setSatelliteData(data)
-        else if (count%5 == 1)
-            hexagon.setSatelliteData(dataW)
-        else if (count%5 == 2)
-            hexagon.setSatelliteData(dataG)
-        else if (count%5 == 3)
-            hexagon.setSatelliteData(dataY)
-        else
-            hexagon.setSatelliteData(dataP)
+        hexagon.setSatelliteData(data)
     }
 
     /*for (hexagon in grid.hexagons) {
@@ -57,13 +47,13 @@ fun main(args : Array<String>) {
 
     //HexagonalGrid# clearSatelliteData(grid)
     //print("\u001b[0m")
-
+    var checker =0
     var option_choice = ""
     while(option_choice!="q"){
         println("Welcome to HexaBot.")
         println("Enter: \n  " +
                 "1: To create a random grid \n  " +
-                "2: To view the current grid (If you haven't created a grid, one will be made for you)\n  " +
+                "2: To view the current grid (If you haven't created a grid, a blank one will be shown)\n  " +
                 "3: To start creating a custom grid \n  " +
                 "X Y: Enter 2 numbers representing [X, Y] to view the neighbours of a hexagon at [X, Y] of the grid \n  " +
                 "Q/q: To quit ")
@@ -86,12 +76,80 @@ fun main(args : Array<String>) {
                     hexagon.setSatelliteData(dataP)
             }
             printGrid(grid)
+            checker=0
         }
         else if(option_choice=="3"){
-            for (hexagon in grid.hexagons)
-                hexagon.setSatelliteData(data)
+            if(checker==0){
+                for (hexagon in grid.hexagons)
+                    hexagon.setSatelliteData(data)
+                checker=1
+            }
+
             printGrid(grid)
-            println("Here's a blank grid as this section has not been set up yet :) \n ")
+            println("Here is the current grid! \n ")
+
+            println("Where would you like to place a pixel? Enter Row(1-7) and Color(W,G,Y,P) in form 'X Y' where X is the row and Y is a color")
+            val inp = readLine()!!
+            val inpArr = inp.split(" ")
+            if(inpArr.size<=1)
+                println("Try Again!")
+            else {
+                var rowi=-1
+                try {
+                    rowi = Integer.valueOf(inpArr[0])
+                }
+                catch (exception: Exception){
+                    println("Try Again!")
+                    continue
+                }
+                val colour = inpArr[1].toString()
+                if(rowi>0&&rowi<8&&(colour=="W"||colour=="P"||colour=="G"||colour=="Y")){
+                    var row = 10
+                    while(row>=0){
+                        var x_coords = 0-row/2 + Integer.valueOf(inpArr[0])
+                        if(row%2==0){
+                            if(Integer.valueOf(inpArr[0])==7)
+                                x_coords--
+                            val hexagon = grid.getByCubeCoordinate(CubeCoordinate.fromCoordinates(x_coords, row)).get()
+                            if(!hexagon.satelliteData.get().isOccupied()) {
+                                when (inpArr[1].toString().uppercase()) {
+                                    "W" -> hexagon.setSatelliteData(dataW)
+                                    "Y" -> hexagon.setSatelliteData(dataY)
+                                    "P" -> hexagon.setSatelliteData(dataP)
+                                    "G" -> hexagon.setSatelliteData(dataG)
+                                }
+                                break;
+                            }
+                            else{
+                                row--
+                            }
+                        }
+                        else {
+                            x_coords--
+                            val hexagon = grid.getByCubeCoordinate(CubeCoordinate.fromCoordinates(x_coords, row)).get()
+                            if (!hexagon.satelliteData.get().isOccupied()) {
+                                when (inpArr[1].toString()) {
+                                    "W" -> hexagon.setSatelliteData(dataW)
+                                    "Y" -> hexagon.setSatelliteData(dataY)
+                                    "P" -> hexagon.setSatelliteData(dataP)
+                                    "G" -> hexagon.setSatelliteData(dataG)
+                                }
+                                break;
+                            }
+                            else{
+                                row--
+                            }
+                        }
+
+                    }
+                }
+                else{
+                    println("Try Again")
+                    continue
+                }
+            }
+
+            printGrid(grid)
         }
         else if(option_choice=="q"||option_choice=="Q"){
             println("Have a great day!")
