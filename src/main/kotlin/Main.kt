@@ -51,7 +51,7 @@ fun main(args : Array<String>) {
                 "X Y: Enter 2 numbers representing [X, Y] to view the neighbours of a hexagon at [X, Y] of the grid \n  " +
                 "Column Color: Enter Eg. [6 W] such that first is a column number between 1-7 and the second is a color [W, Y, G, P] for the Hexagon in the grid \n  " +
                 "Q/q: To quit ")
-        option_choice = readLine()!!
+        option_choice = readLine()!!.trim()
         if(option_choice=="2"){
             printGrid(grid)
         }
