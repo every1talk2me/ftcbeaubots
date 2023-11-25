@@ -1,3 +1,8 @@
+import java.util.*
+
+/**
+ * Main method to start the program.
+ */
 fun main(args : Array<String>) {
     println("Hello Hexa!")
 
@@ -197,10 +202,11 @@ fun main(args : Array<String>) {
         }
         else if(option_choice.matches(("-?[0-9]*.[0-9]*").toRegex())) {
             val coords = option_choice.split(" ")
-            if(coords.size>1) {
+            logMsg("["+coords.joinToString(",")+"]"+" # of elems: "+coords.size)
+            if(coords.size>1 && coords[1] != "") {
                 println("You wanted hexagon at (" + coords[0] + ", " + coords[1] + ")")
                 if (Integer.valueOf(coords[1]) == (-2 * Integer.valueOf(coords[0]))) {
-                    println("This position does not exist! Please look at the grid to view valid positions!")
+                    println("This position (" + coords[0] + ", " + coords[1] + ") does not exist! Please look at the grid to view valid positions!")
                 } else if (Integer.valueOf(coords[0]) > 6 || Integer.valueOf(coords[0]) < -4 || Integer.valueOf(coords[1]) < 0 || Integer.valueOf(
                         coords[1]
                     ) > 10
@@ -237,7 +243,7 @@ fun main(args : Array<String>) {
  * @param [s] string to log
  */
 fun logMsg(s: String) {
-    //println(bg(199)+"=> log: $s \u001B[0m \n");
+    println(bg(199)+"=> log: $s \u001B[0m \n");
 }
 
 /**
