@@ -1,4 +1,7 @@
+import java.io.File
+import java.io.InputStream
 import java.util.*
+import kotlin.collections.ArrayList
 
 /**
  * Main method to start the program.
@@ -23,15 +26,17 @@ fun main(args : Array<String>) {
     val dataW = SatelliteDataImpl()
     dataW.setOccupied(Color.WHITE)
 
-    val dataY = SatelliteDataImpl()
-    dataY.setOccupied(Color.YELLOW)
-
     val dataG = SatelliteDataImpl()
     dataG.setOccupied(Color.GREEN)
 
     val dataP = SatelliteDataImpl()
     dataP.setOccupied(true)
     dataP.setColor(Color.PURPLE)
+
+    val dataY = SatelliteDataImpl()
+    dataY.setOccupied(Color.YELLOW)
+
+    val listOfData = arrayListOf<SatelliteDataImpl>(dataW, dataG, dataP, dataY)
 
     val cArray = arrayOf<Int>(1,2,3,4,5)
     var count = 0
@@ -48,11 +53,23 @@ fun main(args : Array<String>) {
         println("Enter: \n  " +
                 "1: To create a random grid \n  " +
                 "2: To view the current grid (If you haven't created a grid, a blank one will be shown)\n  " +
+                "3: To Setup the current Backboard Grid from file \n  " +
                 "X Y: Enter 2 numbers representing [X, Y] to view the neighbours of a hexagon at [X, Y] of the grid \n  " +
                 "Column Color: Enter Eg. [6 W] such that first is a column number between 1-7 and the second is a color [W, Y, G, P] for the Hexagon in the grid \n  " +
                 "Q/q: To quit ")
+
         option_choice = readLine()!!.trim()
-        if(option_choice=="2"){
+
+        if(option_choice=="3"){
+            val setupList:ArrayList<BackboardGrid> = readBackboardSetupFile("BackboardGridSetup.txt")
+            for(i in setupList.indices) {
+                setupHexagonOnBackboard(setupList[i].column, setupList[i].color, grid, listOfData)
+                printGrid(grid)
+            }
+        }
+
+
+        else if(option_choice=="2"){
             printGrid(grid)
         }
         else if(option_choice=="1"){
@@ -86,112 +103,13 @@ fun main(args : Array<String>) {
 //
             else if(option_choice.matches(("[0-9].[A-Za-z]").toRegex())) {
             //val inp = readLine()!!
-            val inpArr = option_choice.split(" ")
-            if(inpArr.size<=1)
-                println("Try Again!")
+            if(validateInputOption(option_choice))
+                continue
             else {
-                var inputColumn = -1
-                try {
-                    inputColumn = Integer.valueOf(inpArr[0])
-                }
-                catch (exception: Exception){
-                    println("Try Again!")
-                    continue
-                }
-                if (inputColumn<1 || inputColumn>7) {
-                    println("The row should be between 1 and 7. Try Again!")
-                    continue
-                }
+                val inpArr = option_choice.split(" ")
+                val inputColumn = Integer.valueOf(inpArr[0])
                 val inputColor = inpArr[1].toString().uppercase()
-                if(inputColor=="W"||inputColor=="P"||inputColor=="G"||inputColor=="Y") {
-                    var row = 10
-                    while(row>=0) {
-                        var x_coords = 0-row/2 + Integer.valueOf(inpArr[0])
-                        if(row%2==0) {
-                            if(Integer.valueOf(inpArr[0])==7)
-                                x_coords--
-                            val hexagon = grid.getByCubeCoordinate(CubeCoordinate.fromCoordinates(x_coords, row)).get()
-                            var hexagonToUpdate = hexagon
-                            logMsg(x_coords.toString()+" "+row.toString())
-                            if(!hexagon.satelliteData.get().isOccupied()) {
-                                //println("hi")
-                                while(!gravityCheck(grid, hexagonToUpdate)) {
-                                    //hexPrintln(hexagonToUpdate)
-                                    if(row%2==0){
-                                        //println("hi1")
-                                        if(!grid.getNeighborByIndex(hexagonToUpdate,4).get().satelliteData.get().isOccupied())
-                                            hexagonToUpdate = grid.getNeighborByIndex(hexagonToUpdate,4).get()
-                                        else
-                                            hexagonToUpdate = grid.getNeighborByIndex(hexagonToUpdate,5).get()
-                                    }
-                                    else{
-                                        //println("hi2")
-                                        if(!grid.getNeighborByIndex(hexagonToUpdate,4).get().satelliteData.get().isOccupied())
-                                            hexagonToUpdate = grid.getNeighborByIndex(hexagonToUpdate,4).get()
-                                        else
-                                            hexagonToUpdate = grid.getNeighborByIndex(hexagonToUpdate,5).get()
-                                    }
-                                    //row++
-                                }
-                                when (inputColor) {
-                                    "W" -> hexagonToUpdate.setSatelliteData(dataW)
-                                    "Y" -> hexagonToUpdate.setSatelliteData(dataY)
-                                    "P" -> hexagonToUpdate.setSatelliteData(dataP)
-                                    "G" -> hexagonToUpdate.setSatelliteData(dataG)
-                                }
-                                break
-                            }
-                            else{
-                                row--
-                            }
-                        }
-                        else {
-                            x_coords--
-                            logMsg("Coordinates are: [$x_coords, $row]")
-                            val hexagon = grid.getByCubeCoordinate(CubeCoordinate.fromCoordinates(x_coords, row)).get()
-                            logMsg("Hexagon found!")
-                            var hexagon2 = hexagon
-                            //hexPrintln(hexagon2)
-                            //row--
-
-                            //hexPrintln(hexagon2)
-                            if (!hexagon2.satelliteData.get().isOccupied()) {
-                                while(!gravityCheck(grid, hexagon2)){
-                                    //hexPrintln(hexagon2)
-                                    if(row%2==0){
-                                        //println("hi1")
-                                        if(!grid.getNeighborByIndex(hexagon2,4).get().satelliteData.get().isOccupied())
-                                            hexagon2 = grid.getNeighborByIndex(hexagon2,4).get()
-                                        else
-                                            hexagon2 = grid.getNeighborByIndex(hexagon2,5).get()
-                                    }
-                                    else{
-                                        //println("hi2")
-                                        if(!grid.getNeighborByIndex(hexagon2,4).get().satelliteData.get().isOccupied())
-                                            hexagon2 = grid.getNeighborByIndex(hexagon2,4).get()
-                                        else
-                                            hexagon2 = grid.getNeighborByIndex(hexagon2,5).get()
-                                    }
-                                    //row++
-                                }
-                                when (inputColor) {
-                                    "W" -> hexagon2.setSatelliteData(dataW)
-                                    "Y" -> hexagon2.setSatelliteData(dataY)
-                                    "P" -> hexagon2.setSatelliteData(dataP)
-                                    "G" -> hexagon2.setSatelliteData(dataG)
-                                }
-                                break
-                            }
-                            else{
-                                row--
-                            }
-                        }
-                    }
-                }
-                else{
-                    println("Color input is not correct. Please check and Try Again")
-                    continue
-                }
+                setupHexagonOnBackboard(inputColumn, inputColor, grid, listOfData)
             }
             printGrid(grid)
         }
@@ -235,6 +153,98 @@ fun main(args : Array<String>) {
         }
         println("")
     }
+}
+
+
+fun setupHexagonOnBackboard(
+    inputColumn: Int,
+    inputColor: String,
+    grid: HexagonalGrid<SatelliteDataImpl>,
+    listOfData: ArrayList<SatelliteDataImpl>
+) {
+        var row = 10
+        while(row>=0) {
+            var x_coords = 0-row/2 + Integer.valueOf(inputColumn)
+            if(row%2==0) {
+                if(Integer.valueOf(inputColumn)==7)
+                    x_coords--
+                val hexagon = grid.getByCubeCoordinate(CubeCoordinate.fromCoordinates(x_coords, row)).get()
+                var hexagonToUpdate = hexagon
+                logMsg(x_coords.toString()+" "+row.toString())
+                if(!hexagon.satelliteData.get().isOccupied()) {
+                    //println("hi")
+                    while(!gravityCheck(grid, hexagonToUpdate)) {
+                        //hexPrintln(hexagonToUpdate)
+                        if(row%2==0){
+                            //println("hi1")
+                            if(!grid.getNeighborByIndex(hexagonToUpdate,4).get().satelliteData.get().isOccupied())
+                                hexagonToUpdate = grid.getNeighborByIndex(hexagonToUpdate,4).get()
+                            else
+                                hexagonToUpdate = grid.getNeighborByIndex(hexagonToUpdate,5).get()
+                        }
+                        else{
+                            //println("hi2")
+                            if(!grid.getNeighborByIndex(hexagonToUpdate,4).get().satelliteData.get().isOccupied())
+                                hexagonToUpdate = grid.getNeighborByIndex(hexagonToUpdate,4).get()
+                            else
+                                hexagonToUpdate = grid.getNeighborByIndex(hexagonToUpdate,5).get()
+                        }
+                        //row++
+                    }
+                    when (inputColor) {
+                        "W" -> hexagonToUpdate.setSatelliteData(listOfData[0])
+                        "G" -> hexagonToUpdate.setSatelliteData(listOfData[1])
+                        "P" -> hexagonToUpdate.setSatelliteData(listOfData[2])
+                        "Y" -> hexagonToUpdate.setSatelliteData(listOfData[3])
+                    }
+                    break
+                }
+                else{
+                    row--
+                }
+            }
+            else {
+                x_coords--
+                logMsg("Coordinates are: [$x_coords, $row]")
+                val hexagon = grid.getByCubeCoordinate(CubeCoordinate.fromCoordinates(x_coords, row)).get()
+                logMsg("Hexagon found!")
+                var hexagon2 = hexagon
+                //hexPrintln(hexagon2)
+                //row--
+
+                //hexPrintln(hexagon2)
+                if (!hexagon2.satelliteData.get().isOccupied()) {
+                    while(!gravityCheck(grid, hexagon2)){
+                        //hexPrintln(hexagon2)
+                        if(row%2==0){
+                            //println("hi1")
+                            if(!grid.getNeighborByIndex(hexagon2,4).get().satelliteData.get().isOccupied())
+                                hexagon2 = grid.getNeighborByIndex(hexagon2,4).get()
+                            else
+                                hexagon2 = grid.getNeighborByIndex(hexagon2,5).get()
+                        }
+                        else{
+                            //println("hi2")
+                            if(!grid.getNeighborByIndex(hexagon2,4).get().satelliteData.get().isOccupied())
+                                hexagon2 = grid.getNeighborByIndex(hexagon2,4).get()
+                            else
+                                hexagon2 = grid.getNeighborByIndex(hexagon2,5).get()
+                        }
+                        //row++
+                    }
+                    when (inputColor) {
+                        "W" -> hexagon2.setSatelliteData(listOfData[0])
+                        "G" -> hexagon2.setSatelliteData(listOfData[1])
+                        "P" -> hexagon2.setSatelliteData(listOfData[2])
+                        "Y" -> hexagon2.setSatelliteData(listOfData[3])
+                    }
+                    break
+                }
+                else{
+                    row--
+                }
+            }
+        }
 }
 
 /**
@@ -379,4 +389,60 @@ fun colorPrint(hexagon: Hexagon<SatelliteDataImpl>){
         l = " "+l
 
     print(bg(hexagon.satelliteData.get().getColor()!!.hexColor)+"["+l+"]\u001B[0m ")
+}
+
+
+fun readBackboardSetupFile(fileName: String): ArrayList<BackboardGrid> {
+    val inputStream: InputStream = File(fileName).absoluteFile.inputStream()
+//    println(inputStream)
+    val setupBackboard = arrayListOf<BackboardGrid>()
+    File(fileName).forEachLine { logMsg(it)
+        for(lineValues in it.split(",")) {
+            val trimLineValue = lineValues.trim()
+            logMsg("value is: [$trimLineValue]")
+            if(validateInputOption(trimLineValue)) {
+                val backboard = BackboardGrid(
+                    Integer.parseInt(trimLineValue.split(" ")[0].trim()),
+                    trimLineValue.split(" ")[1].trim()
+                )
+                setupBackboard.add(backboard)
+            }
+        }
+    }
+    return setupBackboard
+}
+
+fun validateInputOption(inputOption: String): Boolean {
+    if (!(inputOption.matches(("[0-9].[A-Za-z]").toRegex()))) {
+        println("The input does not match the expected type of [Column Color]. Try again!")
+        return false
+    }
+    val inpArr = inputOption.split(" ")
+
+    if(inpArr.size<=1)
+        println("The input is a single character, Try Again!")
+    else {
+        var inputColumn = -1
+        try {
+            inputColumn = Integer.valueOf(inpArr[0])
+        } catch (exception: Exception) {
+            println("The first argument is not a number, Try Again!")
+            return false
+        }
+        if (inputColumn < 1 || inputColumn > 7) {
+            println("The column should be between 1 and 7. Try Again!")
+            return false
+        }
+        val inputColor = inpArr[1].toString().uppercase()
+        if (!(inputColor == "W" || inputColor == "P" || inputColor == "G" || inputColor == "Y")) {
+            println("Color input is not correct. Please check and Try Again")
+            return false
+        }
+    }
+        return true
+}
+
+class BackboardGrid(val column: Int, val color: String) {
+    //private var column = 0
+    //private var color: String = "B"
 }
